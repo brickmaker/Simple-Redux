@@ -25,4 +25,4 @@ subset of Redux's API
 
 ### example
 
-Based on redux's [*counter-vanilla* example](https://github.com/reduxjs/redux/tree/master/examples/counter-vanilla), add `combineReducers()` and `applyMiddleware`. see: `/counter-vanilla-middleware`
+Based on redux's [*counter-vanilla* example](https://github.com/reduxjs/redux/tree/master/examples/counter-vanilla), add `combineReducers()` and `applyMiddleware`. see: `index.html`
