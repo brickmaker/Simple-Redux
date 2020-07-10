@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Redux example</title>
+    <script src="./SimpleRedux.js"></script>
+  </head>
+  <body>
+    <div>
+      <p>
+        Counter: <span id="counterValue">0</span> times; Clicked:
+        <span id="clickedValue">0</span> times
+        <button id="increment">+</button>
+        <button id="decrement">-</button>
+        <button id="incrementIfOdd">Increment if odd</button>
+        <button id="incrementAsync">Increment async</button>
+      </p>
+    </div>
+    <script>
+      // reducers
+      function counter(state, action) {
+        if (typeof state === "undefined") {
+          return 0;
+        }
+
+        switch (action.type) {
+          case "INCREMENT":
+            return state + 1;
+          case "DECREMENT":
+            return state - 1;
+          default:
+            return state;
+        }
+      }
+
+      function clickCounter(state, action) {
+        if (typeof state === "undefined") {
+          return 0;
+        }
+        switch (action.type) {
+          case "INCREMENT":
+          case "DECREMENT":
+            return state + 1;
+          default:
+            return state;
+        }
+      }
+
+      // middlewares
+      const logger = (store) => (next) => (action) => {
+        console.group(action.type);
+        console.info("dispatching", action);
+        let result = next(action);
+        console.log("next state", store.getState());
+        console.groupEnd();
+        return result;
+      };
+
+      const thunk = (store) => (next) => (action) => {
+        typeof action === "function"
+          ? action(store.dispatch, store.getState)
+          : next(action);
+      };
+
+      var store = SimpleRedux.createStore(
+        SimpleRedux.combineReducers({ counter, clickCounter }),
+        SimpleRedux.applyMiddleware(thunk, logger)
+      );
+
+      var counterValue = document.getElementById("counterValue");
+      var clickedValue = document.getElementById("clickedValue");
+
+      function render() {
+        counterValue.innerHTML = store.getState().counter.toString();
+        clickedValue.innerHTML = store.getState().clickCounter.toString();
+      }
+
+      render();
+      store.subscribe(render);
+
+      document
+        .getElementById("increment")
+        .addEventListener("click", function () {
+          store.dispatch({ type: "INCREMENT" });
+        });
+
+      document
+        .getElementById("decrement")
+        .addEventListener("click", function () {
+          store.dispatch({ type: "DECREMENT" });
+        });
+
+      document
+        .getElementById("incrementIfOdd")
+        .addEventListener("click", function () {
+          if (store.getState().counter % 2 !== 0) {
+            store.dispatch({ type: "INCREMENT" });
+          }
+        });
+
+      document
+        .getElementById("incrementAsync")
+        .addEventListener("click", function () {
+          setTimeout(function () {
+            store.dispatch({ type: "INCREMENT" });
+          }, 1000);
+        });
+    </script>
+  </body>
+</html>
