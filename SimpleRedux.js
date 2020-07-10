@@ -1,55 +1,50 @@
 function createStore(reducer, enhancer) {
   if (enhancer) {
-    return enhancer(createStore)(reducer)
+    return enhancer(createStore)(reducer); // when given applyMiddleware
   }
-  let state = undefined
-  const currentReducer = reducer
-  const listeners = []
-  dispatch({ type: '@@redux/INIT' })
+  let state = undefined; // store state tree
+  const listeners = [];
+  dispatch({ type: "@@redux/INIT" }); // dispatch init event to set state
+
   function dispatch(action) {
-    state = currentReducer(state, action)
-    listeners.forEach(listener => listener())
+    state = reducer(state, action);
+    listeners.forEach((listener) => listener());
   }
   function subscribe(listener) {
-    listeners.push(listener)
+    listeners.push(listener);
     return function unsubscribe() {
-      const idx = listeners.indexOf(listener)
-      listeners.splice(idx, 1)
-    }
+      listeners.splice(listeners.indexOf(listener), 1);
+    };
   }
   function getState() {
-    return state
+    return state;
   }
-  return {
-    dispatch,
-    subscribe,
-    getState
-  }
+
+  return { dispatch, subscribe, getState };
 }
 
 function combineReducers(reducers) {
   return function reducer(state = {}, action) {
-    const newState = {}
+    const newState = {};
     for (const key in reducers) {
-      newState[key] = reducers[key](state[key], action)
+      // iterate keys and calculate new state
+      newState[key] = reducers[key](state[key], action);
     }
-    return newState
-  }
+    return newState;
+  };
 }
 
 function applyMiddleware(...middlewares) {
-  return createStore => (reducer, ...args) => {
-    const store = createStore(reducer, ...args)
-    middlewares = middlewares.slice()
-    middlewares.reverse()
-    let dispatch = store.dispatch
-    middlewares.forEach(middleware => (dispatch = middleware(store)(dispatch)))
-    return { ...store, dispatch }
-  }
+  return (createStore) => (reducer, ...args) => {
+    const store = createStore(reducer, ...args);
+    middlewares = middlewares.slice().reverse();
+    let dispatch = store.dispatch;
+    // wrapper dispatch by middlewares
+    middlewares.forEach(
+      (middleware) => (dispatch = middleware(store)(dispatch))
+    );
+    return { ...store, dispatch };
+  };
 }
 
-const SimpleRedux = {
-  createStore,
-  combineReducers,
-  applyMiddleware
-}
+const SimpleRedux = { createStore, combineReducers, applyMiddleware };
